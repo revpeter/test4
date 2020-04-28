@@ -5,13 +5,10 @@ from dash.dependencies import Input, Output
 
 import pandas as pd
 
-
+df = pd.read_csv('country_indicators.csv')
+available_indicators = df['Indicator Name'].unique()
 
 app = dash.Dash(__name__)
-
-df = pd.read_csv('country_indicators.csv')
-
-available_indicators = df['Indicator Name'].unique()
 
 app.layout = html.Div([
     html.Div([
