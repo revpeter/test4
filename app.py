@@ -7,6 +7,8 @@ import pandas as pd
 
 df = pd.read_csv('country_indicators.csv')
 available_indicators = df['Indicator Name'].unique()
+tabtitle='Proba2'
+
 
 app = dash.Dash(__name__)
 server = app.server
