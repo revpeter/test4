@@ -5,11 +5,11 @@ from dash.dependencies import Input, Output
 
 import pandas as pd
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
 
 app = dash.Dash(__name__)
 
-df = pd.read_csv('https://plotly.github.io/datasets/country_indicators.csv')
+df = pd.read_csv('country_indicators.csv')
 
 available_indicators = df['Indicator Name'].unique()
 
