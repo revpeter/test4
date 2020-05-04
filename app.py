@@ -2,101 +2,56 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-
+import plotly.express as px
 import pandas as pd
+import numpy as np
 
-df = pd.read_csv('country_indicators.csv')
-available_indicators = df['Indicator Name'].unique()
-tabtitle='Proba2'
+#Fajl beolvasas
+hh = pd.read_csv("heart.csv")
+hh["sex2"] = hh["sex"].replace({1:"F", 0:"N"})
 
+#Stilusok
+s1 = {"color": "black",
+      "font-weight": "bold",
+      "text-align": "center",
+      'backgroundColor': 'rgb(250, 250, 250)',
+      "display": "inline-block",
+      "width": "50%"}
 
+s2 = {"color": "blue",
+      "text-align": "center",
+      "display": "inline-block",
+      "width": "100%"}
+
+#Dropdown values
+optionsM = []
+for i in hh.columns:
+    optionsM.append({'label': i, 'value': i})
+
+#App
 app = dash.Dash(__name__)
 server = app.server
-app.title=tabtitle
+app.title="Test4"
 
-app.layout = html.Div([
-    html.Div([
-
-        html.Div([
-            dcc.Dropdown(
-                id='xaxis-column',
-                options=[{'label': i, 'value': i} for i in available_indicators],
-                value='Fertility rate, total (births per woman)'
-            ),
-            dcc.RadioItems(
-                id='xaxis-type',
-                options=[{'label': i, 'value': i} for i in ['Linear', 'Log']],
-                value='Linear',
-                labelStyle={'display': 'inline-block'}
-            )
-        ],
-        style={'width': '48%', 'display': 'inline-block'}),
-
-        html.Div([
-            dcc.Dropdown(
-                id='yaxis-column',
-                options=[{'label': i, 'value': i} for i in available_indicators],
-                value='Life expectancy at birth, total (years)'
-            ),
-            dcc.RadioItems(
-                id='yaxis-type',
-                options=[{'label': i, 'value': i} for i in ['Linear', 'Log']],
-                value='Linear',
-                labelStyle={'display': 'inline-block'}
-            )
-        ],style={'width': '48%', 'float': 'right', 'display': 'inline-block'})
-    ]),
-
-    dcc.Graph(id='indicator-graphic'),
-
-    dcc.Slider(
-        id='year--slider',
-        min=df['Year'].min(),
-        max=df['Year'].max(),
-        value=df['Year'].max(),
-        marks={str(year): str(year) for year in df['Year'].unique()},
-        step=None
-    )
-])
-
-@app.callback(
-    Output('indicator-graphic', 'figure'),
-    [Input('xaxis-column', 'value'),
-     Input('yaxis-column', 'value'),
-     Input('xaxis-type', 'value'),
-     Input('yaxis-type', 'value'),
-     Input('year--slider', 'value')])
-def update_graph(xaxis_column_name, yaxis_column_name,
-                 xaxis_type, yaxis_type,
-                 year_value):
-    dff = df[df['Year'] == year_value]
-
-    return {
-        'data': [dict(
-            x=dff[dff['Indicator Name'] == xaxis_column_name]['Value'],
-            y=dff[dff['Indicator Name'] == yaxis_column_name]['Value'],
-            text=dff[dff['Indicator Name'] == yaxis_column_name]['Country Name'],
-            mode='markers',
-            marker={
-                'size': 15,
-                'opacity': 0.5,
-                'line': {'width': 0.5, 'color': 'white'}
-            }
-        )],
-        'layout': dict(
-            xaxis={
-                'title': xaxis_column_name,
-                'type': 'linear' if xaxis_type == 'Linear' else 'log'
-            },
-            yaxis={
-                'title': yaxis_column_name,
-                'type': 'linear' if yaxis_type == 'Linear' else 'log'
-            },
-            margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-            hovermode='closest'
-        )
-    }
+app.layout = html.Div(children = [html.Div("WELCOMME", style = s2),
+                                  html.Div(html.Label(["y-tengely",
+                                                       dcc.Dropdown(id = "drop_down1",options = optionsM, value = "chol")]),
+                                           style = s1),
+                                  html.Div(html.Label(["x-tengely",
+                                                       dcc.Dropdown(id = "drop_down2",options = optionsM, value = "age")]),
+                                           style = s1),
+                                  html.Div(dcc.Markdown("""Az y-tengely arra jo hogy..."""), style = s1),
+                                  html.Div(dcc.Markdown("""Az x-tengely arra jo hogy..."""), style = s1),
+                                  html.Div(children = [dcc.Graph(id = "plot_area")],
+                                           style = s2)])
 
 
-if __name__ == '__main__':
+@app.callback(Output("plot_area", "figure"), [Input("drop_down1", "value"), Input("drop_down2", "value")])
+
+def updateplot(ff_val, ff_x):
+    fig = px.scatter(hh, x=ff_x, y=ff_val, 
+                 color='sex2', color_discrete_map= {"1": 'blue', "0": 'green'})
+    return({"data": fig.data, "layout":fig.layout})
+
+if __name__ == "__main__":
     app.run_server()
